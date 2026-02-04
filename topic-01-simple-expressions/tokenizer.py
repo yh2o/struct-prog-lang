@@ -19,10 +19,11 @@ patterns = [
     (r"\*", "*"),
     (r"\(", "("),
     (r"\)", ")"),
-    (r".", "error")
+    (r".", "error"),
 ]
 
-patterns = [(re.compile(p), tag) for p,tag in patterns]
+patterns = [(re.compile(p), tag) for p, tag in patterns]
+
 
 def tokenize(characters):
     "Tokenize a string using the patterns above"
@@ -49,7 +50,7 @@ def tokenize(characters):
             if current_tag == "number":
                 token["value"] = int(value)
             tokens.append(token)
-        
+
         # advance position and update line/column
         for ch in value:
             if ch == "\n":
@@ -60,7 +61,8 @@ def tokenize(characters):
         position = match.end()
 
     tokens.append({"tag": None, "line": line, "column": column})
-    return tokens     
+    return tokens
+
 
 def test_digits():
     print("test tokenize digits")
@@ -73,11 +75,13 @@ def test_digits():
     assert t[0]["value"] == 1
     assert t[1]["tag"] is None
 
+
 def test_operators():
     print("test tokenize operators")
     t = tokenize("+ - * / ( )")
     tags = [tok["tag"] for tok in t]
-    assert tags == ["+", "-", "*", "/", None]
+    assert tags == ["+", "-", "*", "/", "(", ")", None]
+
 
 def test_expressions():
     print("test tokenize expressions")
@@ -89,6 +93,7 @@ def test_expressions():
     assert t[4]["tag"] == "number" and t[4]["value"] == 3
     assert t[5]["tag"] is None
 
+
 def test_whitespace():
     print("test tokenize whitespace")
     t = tokenize("1 +\t2  \n*    3")
@@ -99,6 +104,7 @@ def test_whitespace():
     assert t[4]["tag"] == "number" and t[4]["value"] == 3
     assert t[5]["tag"] is None
 
+
 def test_error():
     print("test tokenize error")
     try:
@@ -107,7 +113,7 @@ def test_error():
         assert str(e) == "Unexpected character: '@'"
         return
     assert Exception("Error did not happen.")
-     
+
 
 if __name__ == "__main__":
     test_digits()
