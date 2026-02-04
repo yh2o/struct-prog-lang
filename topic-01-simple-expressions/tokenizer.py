@@ -1,3 +1,4 @@
+#standard library used for working with regular expressions
 import re
 from pprint import pprint
 
@@ -9,6 +10,7 @@ from pprint import pprint
 #     print("not match")
 
 patterns = [
+    #(raw string, label of pattern)
     (r"\s+", "whitespace"),
     (r"\d+", "number"),
     (r"\+", "+"),
