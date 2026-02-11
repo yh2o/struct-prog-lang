@@ -109,8 +109,11 @@ def test_digits():
 def test_operators():
     print("test tokenize operators")
     t = tokenize("+ - * / ( )")
+    # for tok in t: iterating going thru each item in list t, item expected to be a dictionary with keys like "tag", "line". varibale tok represents each dictionary in the list t one by one.
+    # tok["tag"]: For each tok (which is a dictionary), this part accesses the value associated with the key "tag". For example, if tok is {"tag": "+", "line": 1, "column": 1}, then tok["tag"] would return "+".
+    # this line creates a new list by going thru each dictionary in t and extracting the "tag" value resulting in a list of all the "tag" values from each token in t.
     tags = [tok["tag"] for tok in t]
-    assert tags == ["+", "-", "*", "/", None]
+    assert tags == ["+", "-", "*", "/", "(", ")", None]
 
 def test_expressions():
     print("test tokenize expressions")
