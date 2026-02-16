@@ -1,4 +1,5 @@
-#standard library used for working with regular expressions
+# tokenizer.py
+# standard library used for working with regular expressions
 import re
 from pprint import pprint
 
@@ -20,6 +21,7 @@ patterns = [
     (r"\*", "*"),
     (r"\(", "("),
     (r"\)", ")"),
+    (r"\%", "%"),
     (r".", "error"),
 ]
 
@@ -89,7 +91,6 @@ def tokenize(characters):
     tokens.append({"tag": None, "line": line, "column": column})
     return tokens     
 
-
 def test_digits():
     print("test tokenize digits")
     #tokenzie function returns a list of tokens which is stored in the variable t 
@@ -105,15 +106,14 @@ def test_digits():
     assert t[0]["value"] == 1
     assert t[1]["tag"] is None
 
-
 def test_operators():
     print("test tokenize operators")
-    t = tokenize("+ - * / ( )")
+    t = tokenize("+ - * / ( ) %")
     # for tok in t: iterating going thru each item in list t, item expected to be a dictionary with keys like "tag", "line". varibale tok represents each dictionary in the list t one by one.
     # tok["tag"]: For each tok (which is a dictionary), this part accesses the value associated with the key "tag". For example, if tok is {"tag": "+", "line": 1, "column": 1}, then tok["tag"] would return "+".
     # this line creates a new list by going thru each dictionary in t and extracting the "tag" value resulting in a list of all the "tag" values from each token in t.
     tags = [tok["tag"] for tok in t]
-    assert tags == ["+", "-", "*", "/", "(", ")", None]
+    assert tags == ["+", "-", "*", "/", "(", ")", "%", None]
 
 def test_expressions():
     print("test tokenize expressions")
@@ -125,6 +125,11 @@ def test_expressions():
     assert t[4]["tag"] == "number" and t[4]["value"] == 3
     assert t[5]["tag"] is None
 
+    t = tokenize("5%2")
+    assert t[0]["tag"] == "number" and t[0]["value"] == 5
+    assert t[1]["tag"] == "%"
+    assert t[2]["tag"] == "number" and t[2]["value"] == 2
+    assert t[3]["tag"] is None
 
 def test_whitespace():
     print("test tokenize whitespace")
@@ -136,7 +141,6 @@ def test_whitespace():
     assert t[4]["tag"] == "number" and t[4]["value"] == 3
     assert t[5]["tag"] is None
 
-
 def test_error():
     print("test tokenize error")
     try:
@@ -145,7 +149,6 @@ def test_error():
         assert str(e) == "Unexpected character: '@'"
         return
     assert Exception("Error did not happen.")
-
 
 if __name__ == "__main__":
     test_digits()

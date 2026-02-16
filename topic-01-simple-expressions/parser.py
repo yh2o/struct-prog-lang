@@ -4,18 +4,23 @@ from tokenizer import tokenize
 from pprint import pprint
 
 # EBNF 
-
 # expression = term { ("+" | "-") term }
 # term       = factor { ("+" | "/") factor }
-# factor     = <number >
+# factor     = <number > | "(" expression ")"
 
+#turns the token into a number only if it is a number otherwise return false
 def parse_factor(tokens):
     """ factor = <number> """
     token = tokens[0]
     if token["tag"] == "number":
         node = {"tag":"number", "value":token["value"]}
         return node, tokens[1:]
-    assert False, f"Expected number, got {token}"
+    if token["tag"] == "(":
+        node, tokens = parse_expression(tokens[1:])
+        if tokens[0]["tag"] != ")":
+            raise SyntaxError(f"Expected ')', got {tokens[0]}")
+        return node, tokens[1:]
+    raise SyntaxError(f"Expected number or '(', got {token}")
 
 def test_parse_factor():
     """ factor = <number> """
@@ -24,19 +29,22 @@ def test_parse_factor():
     ast, tokens = parse_factor(tokens)
     assert ast == {"tag": "number", "value": 3}
     assert tokens == [{"tag": None, "line": 1, "column": 2}]
-
+    tokens = tokenize("(3+4)")
+    ast, tokens = parse_factor(tokens)
+    assert ast == {'tag': '+', 'left': {'tag': 'number', 'value': 3}, 'right': {'tag': 'number', 'value': 4}} 
+    assert tokens == [{'tag': None, 'line': 1, 'column': 6}]
 
 def parse_term(tokens):
-    """term = factor { ("+" | "/") factor }"""
+    """term = factor { ("*" | "/" | "%") factor }"""
     left, tokens = parse_factor(tokens)
-    while tokens[0]["tag"] in ["*", "/"]:
+    while tokens[0]["tag"] in ["*", "/", "%"]:
         op = tokens[0]["tag"]
         right, tokens = parse_factor(tokens[1:])  
         left = {"tag": op, "left": left, "right": right}
     return left, tokens
 
-def test__parse_term():
-    """term = factor { ("+" | "/") factor }"""
+def test_parse_term():
+    """term = factor { ("*" | "/" | "%") factor }"""
     print("test_parse_term()")
     tokens = tokenize("3")
     ast, tokens = parse_term(tokens)
@@ -72,10 +80,17 @@ def test__parse_term():
         'tag': '*',
     }
     assert tokens == [{'column': 6, 'line': 1, 'tag': None}]
+    tokens = tokenize("5%2")
+    ast, tokens = parse_term(tokens)
+    assert ast == {
+        'left': {
+            'tag': 'number', 'value': 5},
+            'right': {'tag': 'number', 'value': 2},
+            'tag': '%'}
+    assert tokens == [{'column': 4, 'line': 1, 'tag': None}]
     # pprint(ast)
     # pprint(tokens)
-    exit()
-
+    # exit()
 
 def parse_expression(tokens): 
     """expression = term { ("+" | "-") term }"""
@@ -85,7 +100,6 @@ def parse_expression(tokens):
         right, tokens = parse_term(tokens[1:])
         left = {"tag": op, "left": left, "right": right}
     return left, tokens
-
 
 def test_parse_expression():
     """expression = term { ("+" | "-") term }"""
@@ -111,10 +125,46 @@ def test_parse_expression():
     }
     assert tokens == [{"column": 8, "line": 1, "tag": None}]
 
+def parse(tokens):
+    ast, tokens = parse_expression(tokens)
+    if tokens[0]["tag"] is not None:
+        raise SyntaxError(f"Unexpected token: {tokens[0]}")
+    return ast
+
+def test_parse_errors():
+    print("test_parse_errors()")
+
+    # missing closing parenthesis
+    try:
+        parse(tokenize("(3+4"))
+        assert False
+    except SyntaxError:
+        pass
+
+    # extra closing parenthesis
+    try:
+        parse(tokenize("3+4)"))
+        assert False
+    except SyntaxError:
+        pass
+
+    # operator without right operand
+    try:
+        parse(tokenize("3+"))
+        assert False
+    except Exception:
+        pass
+
+    # empty parentheses
+    try:
+        parse(tokenize("()"))
+        assert False
+    except Exception:
+        pass
+
 if __name__ == "__main__":
     test_parse_factor()
-    test__parse_term()
+    test_parse_term()
+    test_parse_expression()
+    test_parse_errors()
     print("done")
-
-
-
