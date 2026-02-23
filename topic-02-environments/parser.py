@@ -11,7 +11,7 @@ from pprint import pprint
 
 
 def parse_factor(tokens):
-    """factor = <number>"""
+    # factor = <number> | <identifier> | "(" expresion ")" 
     token = tokens[0]
     if token["tag"] == "number":
         node = {"tag": "number", "value": token["value"]}
