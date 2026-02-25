@@ -144,11 +144,11 @@ def test_whitespace():
 def test_error():
     print("test tokenize error")
     try:
-        t = tokenize("1@@@ +\t2  \n*    3")
+        tokenize("1@@@ +\t2  \n*    3")
     except Exception as e:
         assert str(e) == "Unexpected character: '@'"
         return
-    assert Exception("Error did not happen.")
+    raise Exception("Error did not happen.")
 
 if __name__ == "__main__":
     test_digits()

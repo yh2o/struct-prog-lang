@@ -7,6 +7,9 @@ from pprint import pprint
 
 #   program = statement_list
 #   statement_list = { ";" } [ statement { ";" { ";" } statement } ] { ";" }
+#   block = "{" statement_list "}"
+#   if_statement = "if" "(" expression ")" block [ "else" block ]
+#   while_statement = "while" "(" expression ")" block
 #   print_statement = "print" expression
 #   assignment_statement = <identifier> "=" expression
 #   statement = print_statement | assignment_statement
@@ -17,7 +20,7 @@ from pprint import pprint
 
 
 def parse_factor(tokens):
-    # factor = <number> | <identifier> | "(" expresion ")" 
+    # factor = <number> | <identifier> | "(" expression ")"
     token = tokens[0]
     if token["tag"] == "number":
         node = {"tag": "number", "value": token["value"]}
